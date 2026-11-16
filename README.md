@@ -8,95 +8,104 @@ Application Android de gestion de fiches de personnages pour jeux de rôle (syst
 | --- | --- |
 | Adam Roy | Navigation, écrans, composants, thèmes |
 | Sarragossa Kaiss | Serveur Express, authentification, contrôle d'accès |
-| Jayden Saint-Cyr | Prisma/SQLite serveur, modèle de données, résumé, APK |
+| Jayden Saint-Cyr | Base de données serveur, modèle de données, résumé, APK |
 | À compléter | SQLite mobile, chiffrement, synchronisation, animations |
+
+## Technologies
+
+- Mobile : React Native + Expo SDK 58 (JavaScript) dans Expo Go, expo-router, axios, expo-sqlite, expo-secure-store, expo-crypto (AES-GCM), NetInfo, Reanimated
+- Serveur : Node.js + Express 5 (JavaScript, modules ES), MySQL avec mysql2, bcryptjs, dotenv, nodemon
+- Tests : Jest, Supertest, jest-expo
 
 ## Structure du dépôt
 
 ```
 grimoire/
-├── mobile/                 Application React Native + Expo (TypeScript)
-│   ├── App.tsx
-│   ├── src/
-│   │   ├── composants/     Composants réutilisables
-│   │   ├── ecrans/         Écrans de l'application
-│   │   ├── navigation/     Auth Stack, onglets, modals
-│   │   ├── contextes/      AuthContext, CampagneContext, ThemeContext
-│   │   ├── hooks/          Hooks personnalisés
-│   │   ├── themes/         Parchemin, Donjon, Arcane
-│   │   ├── types/          Types TypeScript partagés
-│   │   ├── services/       apiClient et appels REST
-│   │   ├── bd/             baseLocale (SQLite chiffrée), migrations
-│   │   ├── sync/           fileSync, serviceSync, politiqueConflit
-│   │   ├── securite/       stockageSessionSecurise, fournisseurCle
-│   │   ├── animations/     Les quatre animations
-│   │   └── logique/        Fonctions pures testées
+├── mobile/
+│   ├── app/                     Routes expo-router
+│   │   ├── _layout.jsx          Fournisseurs de contexte + Stack
+│   │   ├── index.jsx            Redirection de départ
+│   │   ├── connexion.jsx
+│   │   ├── campagnes.jsx        Sélection du profil (campagne)
+│   │   ├── (onglets)/           Résumé, personnages, paramètres
+│   │   └── personnage/          [id].jsx (détail), ajout.jsx
+│   ├── animations/              Dé, barre de PV, transition de campagne, cascade
+│   ├── assets/colorsPalette.js  Trois thèmes : parchemin, donjon, arcane
+│   ├── components/              Composants réutilisables
+│   ├── constants/               URL de l'API, statuts, caractéristiques
+│   ├── contexts/                authContext, campagneContext, themeContext
+│   ├── database/                SQLite locale, migrations, accès aux données
+│   ├── hooks/                   useCampagnes, usePersonnages, useReseau, useSynchronisation
+│   ├── securite/                Clé AES, chiffrement, session sécurisée
+│   ├── services/                Instance axios et appels REST
+│   ├── sync/                    File de synchronisation, politique de conflit
+│   ├── utils/                   Fonctions pures testées
 │   └── __tests__/
-├── serveur/                API REST Node.js + Express + Prisma (SQLite)
-│   ├── prisma/             schema.prisma, migrations, seed.ts
-│   ├── src/
-│   │   ├── routes/
-│   │   ├── controleurs/
-│   │   ├── services/
-│   │   ├── middleware/
-│   │   ├── validateurs/
-│   │   ├── app.ts
-│   │   ├── bd.ts
-│   │   └── index.ts
+├── serveur/
+│   ├── app.js                   Configuration Express et routes
+│   ├── server.js                Démarrage du serveur
+│   ├── database.js              Pool de connexions MySQL (mysql2)
+│   ├── bd/schema.sql            Création de la base et des tables
+│   ├── controleurs/
+│   ├── middleware/
+│   ├── routes/
+│   ├── services/                Requêtes SQL
+│   ├── validateurs/
+│   ├── scripts/initialiser.js   Données de démonstration
 │   └── tests/
-├── docs/                   Planification, schémas, captures d'écran
-└── .github/                Modèles d'issue et de pull request
+├── docs/
+└── .github/
 ```
 
-## Prérequis
-
-- Node.js 22 ou plus récent
-- Android Studio (émulateur) ou un téléphone Android
-- Un build de développement Expo (`expo-dev-client`) : SQLCipher ne fonctionne pas dans Expo Go
-
 ## Démarrage du serveur
+
+1. Démarrer MySQL et exécuter `serveur/bd/schema.sql` (MySQL Workbench ou `mysql -u root -p < bd/schema.sql`).
+2. Installer et lancer le serveur :
 
 ```bash
 cd serveur
 npm install
 cp .env.example .env
-npx prisma migrate dev --name init
-npx prisma db seed
+npm run donnees-demo
 npm run dev
 ```
 
-Le serveur écoute sur `http://localhost:3000`. Vérification : `GET /sante`.
+Dans `.env`, renseignez `MYSQL_HOST`, `MYSQL_USER`, `MYSQL_PASSWORD` et `MYSQL_DATABASE`.
+
+La colonne `force` est un mot réservé de MySQL : écrivez-la entre accents graves (`` `force` ``) dans les requêtes SQL.
+
+Vérification : `http://localhost:3000/sante`.
 
 ## Démarrage de l'application mobile
 
 ```bash
 cd mobile
 npm install
-npx expo install @react-navigation/native @react-navigation/native-stack @react-navigation/bottom-tabs react-native-screens react-native-safe-area-context
-npx expo install expo-sqlite expo-secure-store expo-crypto @react-native-community/netinfo react-native-reanimated expo-dev-client
-npx expo start
+cp .env.example .env
+npm start
 ```
 
-Les dépendances doivent être ajoutées avec `npx expo install` pour obtenir des versions compatibles avec le SDK Expo.
+Scannez le code QR avec Expo Go. Dans `.env`, `EXPO_PUBLIC_BACKEND_IP` doit contenir l'adresse IP de l'ordinateur qui exécute le serveur, sur le même réseau que le téléphone.
+
+Pour ajouter une dépendance mobile, utilisez `npx expo install <paquet>`.
 
 ## Identifiants de démonstration
 
-| Courriel | Mot de passe |
-| --- | --- |
-| demo@grimoire.ca | demo1234 |
+À compléter.
 
 ## Tests
 
 ```bash
 cd serveur
 npm test
-```
 
-Tests mobiles : à configurer avec `jest-expo` et React Native Testing Library.
+cd ../mobile
+npm test
+```
 
 ## Génération de l'APK
 
-À compléter (EAS Build ou `npx expo run:android --variant release`).
+À compléter.
 
 ## Limites connues
 
@@ -104,7 +113,7 @@ Tests mobiles : à configurer avec `jest-expo` et React Native Testing Library.
 
 ## Ressources externes
 
-À compléter : bibliothèques, images, icônes et autres ressources utilisées.
+À compléter.
 
 ## Utilisation de l'intelligence artificielle
 

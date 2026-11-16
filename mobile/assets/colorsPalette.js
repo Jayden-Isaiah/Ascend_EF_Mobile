@@ -1,0 +1,40 @@
+const colorsPalette = {
+  parchemin: {
+    nom: 'Parchemin',
+    fond: '#F4ECD8',
+    surface: '#FBF6EA',
+    texte: '#3B2F22',
+    texteSecondaire: '#7A6A55',
+    primaire: '#8B4513',
+    surPrimaire: '#FFF8EC',
+    bordure: '#D9C7A3',
+    succes: '#4F7A3A',
+    danger: '#A63A2B',
+  },
+  donjon: {
+    nom: 'Donjon',
+    fond: '#1B1C1F',
+    surface: '#26282C',
+    texte: '#ECE6DA',
+    texteSecondaire: '#A39C8F',
+    primaire: '#C9A227',
+    surPrimaire: '#1B1C1F',
+    bordure: '#3A3D42',
+    succes: '#6FA35A',
+    danger: '#D9604C',
+  },
+  arcane: {
+    nom: 'Arcane',
+    fond: '#140F2B',
+    surface: '#21194A',
+    texte: '#EDE7FF',
+    texteSecondaire: '#A99CD6',
+    primaire: '#9B6BFF',
+    surPrimaire: '#FFFFFF',
+    bordure: '#3A2E70',
+    succes: '#3FD0A8',
+    danger: '#FF5C8A',
+  },
+};
+
+export default colorsPalette;

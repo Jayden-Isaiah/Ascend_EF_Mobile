@@ -1,0 +1,72 @@
+CREATE DATABASE IF NOT EXISTS grimoire CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE grimoire;
+
+CREATE TABLE IF NOT EXISTS Utilisateur (
+  id CHAR(36) PRIMARY KEY,
+  courriel VARCHAR(255) NOT NULL UNIQUE,
+  motDePasseHash VARCHAR(255) NOT NULL,
+  nomAffiche VARCHAR(60) NOT NULL,
+  creeLe DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS Session (
+  id CHAR(36) PRIMARY KEY,
+  utilisateurId CHAR(36) NOT NULL,
+  jetonHash CHAR(64) NOT NULL UNIQUE,
+  expireLe DATETIME NOT NULL,
+  FOREIGN KEY (utilisateurId) REFERENCES Utilisateur(id)
+);
+
+CREATE TABLE IF NOT EXISTS PreferenceUtilisateur (
+  id CHAR(36) PRIMARY KEY,
+  utilisateurId CHAR(36) NOT NULL UNIQUE,
+  theme ENUM('PARCHEMIN', 'DONJON', 'ARCANE') NOT NULL DEFAULT 'PARCHEMIN',
+  FOREIGN KEY (utilisateurId) REFERENCES Utilisateur(id)
+);
+
+CREATE TABLE IF NOT EXISTS Campagne (
+  id CHAR(36) PRIMARY KEY,
+  utilisateurId CHAR(36) NOT NULL,
+  nom VARCHAR(60) NOT NULL,
+  description TEXT,
+  avatar VARCHAR(20) NOT NULL,
+  supprime BOOLEAN NOT NULL DEFAULT FALSE,
+  creeLe DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  modifieLe DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (utilisateurId) REFERENCES Utilisateur(id),
+  INDEX idxCampagneUtilisateur (utilisateurId)
+);
+
+CREATE TABLE IF NOT EXISTS Personnage (
+  id CHAR(36) PRIMARY KEY,
+  campagneId CHAR(36) NOT NULL,
+  nom VARCHAR(40) NOT NULL,
+  race VARCHAR(40) NOT NULL,
+  classe VARCHAR(40) NOT NULL,
+  niveau TINYINT NOT NULL CHECK (niveau BETWEEN 1 AND 20),
+  pvMax SMALLINT NOT NULL CHECK (pvMax >= 1),
+  pvActuels SMALLINT NOT NULL CHECK (pvActuels >= 0),
+  `force` TINYINT NOT NULL CHECK (`force` BETWEEN 1 AND 20),
+  dexterite TINYINT NOT NULL CHECK (dexterite BETWEEN 1 AND 20),
+  constitution TINYINT NOT NULL CHECK (constitution BETWEEN 1 AND 20),
+  intelligence TINYINT NOT NULL CHECK (intelligence BETWEEN 1 AND 20),
+  sagesse TINYINT NOT NULL CHECK (sagesse BETWEEN 1 AND 20),
+  charisme TINYINT NOT NULL CHECK (charisme BETWEEN 1 AND 20),
+  biographie TEXT,
+  creeLe DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  modifieLe DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CHECK (pvActuels <= pvMax),
+  FOREIGN KEY (campagneId) REFERENCES Campagne(id),
+  INDEX idxPersonnageCampagne (campagneId)
+);
+
+CREATE TABLE IF NOT EXISTS EntreeJournal (
+  id CHAR(36) PRIMARY KEY,
+  personnageId CHAR(36) NOT NULL,
+  titre VARCHAR(100) NOT NULL,
+  contenu TEXT NOT NULL,
+  dateSession DATE NOT NULL,
+  creeLe DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (personnageId) REFERENCES Personnage(id),
+  INDEX idxJournalPersonnage (personnageId)
+);
